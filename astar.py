@@ -34,6 +34,7 @@ class AStar():
                     if (alt < currentNodeNeighbours[i].g):
                         
                         currentNodeNeighbours[i].g = alt
+                        
                         # Update the f value for the queue.
                         currentNodeNeighbours[i].f = alt + currentNodeNeighbours[i].h
                         currentNodeNeighbours[i].cameFrom = currentNode

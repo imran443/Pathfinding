@@ -8,11 +8,11 @@ import math
 from cell import Cell
 from dijkstra import Dijkstra
 from astar import AStar
-
+from jps import JPS
 np.set_printoptions(threshold=np.nan)
 
 # The edge value ranges.
-minimum, max = 1, 10
+minimum, max = 1, 1
 
 # Creates a cell object and stores it in a internal repersentation of the map.
 def preProcessMap(gameMap, gameMapInternal, startNodeXY):
@@ -48,14 +48,24 @@ def findNeighbours(gameMap, gameMapInternal):
                     currentNode.addNeighbour(gameMapInternal[i-1][j])
                     currentNode.addEdge(randint(minimum, max))
                 
-                # top right
-                if (i - 1 > 0 and j + 1 < gameMap.shape[0] and gameMapInternal[i-1][j+1] != '@'):
-                    currentNode.addNeighbour(gameMapInternal[i-1][j+1])
-                    currentNode.addEdge(randint(minimum, max))
-                
                 # right
                 if (j + 1 < gameMap.shape[0] and gameMapInternal[i][j+1] != '@'):
                     currentNode.addNeighbour(gameMapInternal[i][j+1])
+                    currentNode.addEdge(randint(minimum, max))
+                
+                # below
+                if (i + 1 < gameMap.shape[0] and gameMapInternal[i+1][j] != '@'):
+                    currentNode.addNeighbour(gameMapInternal[i+1][j])
+                    currentNode.addEdge(randint(minimum, max))
+
+                # left
+                if(j - 1 > 0 and gameMapInternal[i][j-1] != '@'):
+                    currentNode.addNeighbour(gameMapInternal[i][j-1])
+                    currentNode.addEdge(randint(minimum, max))
+
+                # top right
+                if (i - 1 > 0 and j + 1 < gameMap.shape[0] and gameMapInternal[i-1][j+1] != '@'):
+                    currentNode.addNeighbour(gameMapInternal[i-1][j+1])
                     currentNode.addEdge(randint(minimum, max))
                 
                 # bottom right
@@ -63,19 +73,9 @@ def findNeighbours(gameMap, gameMapInternal):
                     currentNode.addNeighbour(gameMapInternal[i+1][j+1])
                     currentNode.addEdge(randint(minimum, max))
                 
-                # below
-                if (i + 1 < gameMap.shape[0] and gameMapInternal[i+1][j] != '@'):
-                    currentNode.addNeighbour(gameMapInternal[i+1][j])
-                    currentNode.addEdge(randint(minimum, max))
-                
                 # bottom left
                 if(i + 1 < gameMap.shape[0] and j - 1 > 0 and gameMapInternal[i+1][j-1] != '@'):
                     currentNode.addNeighbour(gameMapInternal[i+1][j-1])
-                    currentNode.addEdge(randint(minimum, max))
-                
-                # left
-                if(j - 1 > 0 and gameMapInternal[i][j-1] != '@'):
-                    currentNode.addNeighbour(gameMapInternal[i][j-1])
                     currentNode.addEdge(randint(minimum, max))
                 
                 # top left
@@ -105,14 +105,6 @@ def printMap(map):
         str2 += str1 + '\n'
     print(str2)
     
-# Used for testing purposes 
-def printMapWeights(map):
-    for i in range(map.shape[0]):
-        for j in range(map.shape[1]):
-            print(map[i][j].f, end=', ')
-        
-        print('')
-
 def main():
     tempMap = np.genfromtxt(sys.path[0] + r'\adaptiveDepth\adaptive-depth-1.txt', skip_header=4, dtype=str, delimiter='\n')
     gameMap = np.empty((tempMap.shape[0], tempMap.shape[0]), dtype=str)
@@ -120,6 +112,7 @@ def main():
     # Holds the array of objects which repersent the gameMap.
     gameMapInternal = np.empty((gameMap.shape[0], gameMap.shape[0]), dtype=np.object)
     
+    # Indexes for starting and ending positions
     startNodeXY = [1, 1]
     endNodeXY = [gameMap.shape[0]-2, gameMap.shape[0]-2]
     
@@ -137,14 +130,16 @@ def main():
    
     # This sets up the heuristic values for AStar.
     setHeuristicVals(gameMapInternal, endNode)
-    
+
     # Each tuple added to the queue will have a second value as a counter to break ties.
     # dijkstra = Dijkstra((startNode.f, 0, startNode), endNode)
     # dijkstraMap = dijkstra.dijkstraAlgo(gameMapInternal, gameMap)
-    aStar = AStar((startNode.h, 0, startNode), endNode)
-    aStarMap = aStar.aStarAlgo(gameMapInternal, gameMap)
-    #printMapWeights(gameMapWeights)
-    printMap(aStarMap)
+    # aStar = AStar((startNode.h, 0, startNode), endNode)
+    # aStarMap = aStar.aStarAlgo(gameMapInternal, gameMap)
+    # printMap(aStarMap)
+    jps = JPS(startNode, endNode)
+    jpsMap = jps.JPSAlgo(gameMapInternal, gameMap)
+    printMap(jpsMap)
     
 if __name__ == '__main__':
     main()
