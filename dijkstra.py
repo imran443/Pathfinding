@@ -2,16 +2,17 @@ from queue import PriorityQueue
 
 class Dijkstra():
     # The list which will hold the nodes as we go through.
-    pq = PriorityQueue()
+    pq = None
     vistedList = []
     goalNode = None
-
+    counter = 0
     def __init__(self, initNode, endNode):
+        self.pq = PriorityQueue()
         self.pq.put(initNode)
         self.goalNode = endNode
 
     def dijkstraAlgo(self, gameMapInternal, gameMap):
-        counter = 0
+        self.counter = 0
 
         while (not self.pq.empty()):
             # Get the tuple with the smallest g value.
@@ -24,7 +25,7 @@ class Dijkstra():
             # We have found the goal return the gameMap.
             if (self.goalNode in self.vistedList):
                 updatedGameMap = self.tracePath(self.goalNode, gameMap)
-                return updatedGameMap
+                return updatedGameMap, self.counter
 
             for i in range(len(currentNode.neighbours)):
                 if (currentNodeNeighbours[i] not in self.vistedList):
@@ -36,8 +37,8 @@ class Dijkstra():
                         currentNodeNeighbours[i].cameFrom = currentNode
 
                         # Add it to the priority queue as a tuple so that it can be kept organized.
-                        self.pq.put((currentNodeNeighbours[i].g, counter, currentNodeNeighbours[i]))
-                        counter+=1
+                        self.pq.put((currentNodeNeighbours[i].g, self.counter, currentNodeNeighbours[i]))
+                        self.counter+=1
             
             # Mark this node as visited
             self.vistedList.append(currentNode)

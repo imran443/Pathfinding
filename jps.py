@@ -6,15 +6,17 @@ class JPS():
         pass
 
    # The list which will hold the nodes as we go through.
-    pq = PriorityQueue()
+    pq = None
     vistedList = []
     goalNode = None
     gameMapInternal = None
     counter = 0
 
     def __init__(self, initNode, endNode):
+        self.pq = PriorityQueue()
         self.pq.put((0, self.counter, initNode))
         self.goalNode = endNode
+        
 
     def JPSAlgo(self, gameMapInternal, gameMap):
         self.gameMapInternal = gameMapInternal
@@ -43,7 +45,7 @@ class JPS():
             # Throw this exception when the goal node has been found.
             except self.FoundPath:
                 updatedGameMap = self.tracePath(self.goalNode, gameMap)
-                return updatedGameMap
+                return updatedGameMap, self.counter
             
     # A general method for checking all directions north/south etc.
     def checkCardinalDirection(self, startX, startY, directionX, directionY):

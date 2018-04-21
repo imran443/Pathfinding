@@ -3,6 +3,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from random import randint
 import math
+import datetime
 
 # My class imports
 from cell import Cell
@@ -13,6 +14,10 @@ np.set_printoptions(threshold=np.nan)
 
 # The edge value ranges.
 minimum, max = 1, 1
+
+# Indexes for starting and ending positions
+startNodeXY = None
+endNodeXY = None
 
 # Creates a cell object and stores it in a internal repersentation of the map.
 def preProcessMap(gameMap, gameMapInternal, startNodeXY):
@@ -104,42 +109,70 @@ def printMap(map):
         str1=''.join(line)
         str2 += str1 + '\n'
     print(str2)
-    
-def main():
+
+def createMap():
+    global startNodeXY
+    global endNodeXY
+
     tempMap = np.genfromtxt(sys.path[0] + r'\adaptiveDepth\adaptive-depth-1.txt', skip_header=4, dtype=str, delimiter='\n')
     gameMap = np.empty((tempMap.shape[0], tempMap.shape[0]), dtype=str)
-    
-    # Holds the array of objects which repersent the gameMap.
-    gameMapInternal = np.empty((gameMap.shape[0], gameMap.shape[0]), dtype=np.object)
-    
-    # Indexes for starting and ending positions
-    startNodeXY = [1, 1]
-    endNodeXY = [gameMap.shape[0]-2, gameMap.shape[0]-2]
     
     for i in range(tempMap.shape[0]):
         for j in range(tempMap.shape[0]):
             gameMap[i][j] = tempMap[i][j]
     
+    # Holds the array of objects which repersent the gameMap.
+    gameMapInternal = np.empty((gameMap.shape[0], gameMap.shape[0]), dtype=np.object)
+    
+    startNodeXY = [1, 1]
+    endNodeXY = [gameMap.shape[0]-2, gameMap.shape[0]-2]
+
     preProcessMap(gameMap, gameMapInternal, startNodeXY)
     findNeighbours(gameMap, gameMapInternal)
     
-
-    # Coordinates for the start node and end node.
-    startNode = gameMapInternal[startNodeXY[0]][startNodeXY[1]]
-    endNode = gameMapInternal[endNodeXY[0]][endNodeXY[1]]
-   
-    # This sets up the heuristic values for AStar.
-    setHeuristicVals(gameMapInternal, endNode)
-
-    # Each tuple added to the queue will have a second value as a counter to break ties.
-    # dijkstra = Dijkstra((startNode.f, 0, startNode), endNode)
-    # dijkstraMap = dijkstra.dijkstraAlgo(gameMapInternal, gameMap)
-    # aStar = AStar((startNode.h, 0, startNode), endNode)
-    # aStarMap = aStar.aStarAlgo(gameMapInternal, gameMap)
-    # printMap(aStarMap)
-    jps = JPS(startNode, endNode)
-    jpsMap = jps.JPSAlgo(gameMapInternal, gameMap)
-    printMap(jpsMap)
+    return gameMap, gameMapInternal
     
+    
+def main():
+    continueProcessing = 'Y'
+    
+    while (continueProcessing == 'y' or continueProcessing == 'Y'):
+        # Creates and return the string and object repersentation of the map.
+        gameMap, gameMapInternal = createMap()
+
+        # The actual start and end nodes.
+        startNode = gameMapInternal[startNodeXY[0]][startNodeXY[1]]
+        endNode = gameMapInternal[endNodeXY[0]][endNodeXY[1]]
+
+        algoChoice = input("Choose which algorithm to run? (D - Dijkstra, A - A Star, J - Jump Point Search): ")
+        
+        startTime = datetime.datetime.now()
+        
+        nodesExpanded = 0
+
+        if (algoChoice == 'D' or algoChoice == 'd'):
+            # Each tuple added to the queue will have a second value as a counter to break ties.
+            dijkstra = Dijkstra((startNode.f, 0, startNode), endNode)
+            dijkstraMap, nodesExpanded = dijkstra.dijkstraAlgo(gameMapInternal, gameMap)
+            printMap(dijkstraMap)
+
+        elif (algoChoice == 'A' or algoChoice == 'a'):
+            # This sets up the heuristic values for AStar.
+            setHeuristicVals(gameMapInternal, endNode)
+
+            aStar = AStar((startNode.h, 0, startNode), endNode)
+            aStarMap, nodesExpanded = aStar.aStarAlgo(gameMapInternal, gameMap)
+            printMap(aStarMap)
+
+        elif (algoChoice == 'J' or algoChoice == 'j'):
+            jps = JPS(startNode, endNode)
+            jpsMap, nodesExpanded = jps.JPSAlgo(gameMapInternal, gameMap)
+            printMap(jpsMap)
+        
+        endTime = datetime.datetime.now()
+        print("Time: ", endTime - startTime)
+        print("Nodes searched: ", nodesExpanded)
+        continueProcessing = input("Would you like to continue? (Y or N): ")
+
 if __name__ == '__main__':
     main()
