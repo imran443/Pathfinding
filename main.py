@@ -1,15 +1,20 @@
+# Imran Qureshi, 5510631
+
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from random import randint
 import math
 import datetime
+import csv
 
 # My class imports
 from cell import Cell
 from dijkstra import Dijkstra
 from astar import AStar
 from jps import JPS
+from display import Display
+
 np.set_printoptions(threshold=np.nan)
 
 # The edge value ranges.
@@ -18,6 +23,11 @@ minimum, max = 1, 1
 # Indexes for starting and ending positions
 startNodeXY = None
 endNodeXY = None
+
+fileName = "adaptive-depth-1"
+# newFileName = fileName + "-results.txt"
+
+# f = open(newFileName, 'w', newline="")
 
 # Creates a cell object and stores it in a internal repersentation of the map.
 def preProcessMap(gameMap, gameMapInternal, startNodeXY):
@@ -97,7 +107,7 @@ def setHeuristicVals(gameMapInternal, endNode):
             currentNode = gameMapInternal[i][j]
             currentNode.h = heuristic(currentNode.i, endNode.i, currentNode.j, endNode.j)
 
-
+# Sets the heuristic value up for each node in the array.
 def heuristic(x1, x2, y1, y2):
     dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return dist
@@ -114,7 +124,7 @@ def createMap():
     global startNodeXY
     global endNodeXY
 
-    tempMap = np.genfromtxt(sys.path[0] + r'\adaptiveDepth\adaptive-depth-1.txt', skip_header=4, dtype=str, delimiter='\n')
+    tempMap = np.genfromtxt(sys.path[0] + "\\adaptiveDepth\\" + fileName + ".txt", skip_header=4, dtype=str, delimiter='\n')
     gameMap = np.empty((tempMap.shape[0], tempMap.shape[0]), dtype=str)
     
     for i in range(tempMap.shape[0]):
@@ -124,6 +134,7 @@ def createMap():
     # Holds the array of objects which repersent the gameMap.
     gameMapInternal = np.empty((gameMap.shape[0], gameMap.shape[0]), dtype=np.object)
     
+    # The index for starting node and ending node
     startNodeXY = [1, 1]
     endNodeXY = [gameMap.shape[0]-2, gameMap.shape[0]-2]
 
@@ -146,33 +157,64 @@ def main():
 
         algoChoice = input("Choose which algorithm to run? (D - Dijkstra, A - A Star, J - Jump Point Search): ")
         
+        # Used for recording time for each algorithm run.
         startTime = datetime.datetime.now()
         
         nodesExpanded = 0
+        displayGame = None
 
         if (algoChoice == 'D' or algoChoice == 'd'):
             # Each tuple added to the queue will have a second value as a counter to break ties.
             dijkstra = Dijkstra((startNode.f, 0, startNode), endNode)
             dijkstraMap, nodesExpanded = dijkstra.dijkstraAlgo(gameMapInternal, gameMap)
+            displayPath = Display(dijkstraMap)
+            displayPath.createMap()
             printMap(dijkstraMap)
+            
+            # Prints results to file.
+            # f.write("Dijkstra: \n")
+            # f.write("Beginning position: " + str(startNodeXY[0]) + "," + str(startNodeXY[1]) + " Ending position: " + str(endNodeXY[0]) + ", " + str(endNodeXY[1]) + "\n")
+            # f.write("Running on file: " + fileName + "\n")
 
         elif (algoChoice == 'A' or algoChoice == 'a'):
             # This sets up the heuristic values for AStar.
             setHeuristicVals(gameMapInternal, endNode)
-
             aStar = AStar((startNode.h, 0, startNode), endNode)
             aStarMap, nodesExpanded = aStar.aStarAlgo(gameMapInternal, gameMap)
+            displayPath = Display(aStarMap)
+            displayPath.createMap()
             printMap(aStarMap)
+
+            # f.write("A-Star: \n")
+            # f.write("Beginning position: " + str(startNodeXY[0]) + "," + str(startNodeXY[1]) + " Ending position: " + str(endNodeXY[0]) + ", " + str(endNodeXY[1]) + "\n")
+            # f.write("Running on file: " + fileName + "\n")
+
 
         elif (algoChoice == 'J' or algoChoice == 'j'):
             jps = JPS(startNode, endNode)
             jpsMap, nodesExpanded = jps.JPSAlgo(gameMapInternal, gameMap)
+            displayPath = Display(jpsMap)
+            displayPath.createMap()
             printMap(jpsMap)
+            # f.write("JPS: \n")
+            # f.write("Beginning position: " + str(startNodeXY[0]) + "," + str(startNodeXY[1]) + " Ending position: " + str(endNodeXY[0]) + ", " + str(endNodeXY[1]) + "\n")
+            # f.write("Running on file: " + fileName + "\n")
+
         
         endTime = datetime.datetime.now()
-        print("Time: ", endTime - startTime)
+        
+        timeElapsed = endTime - startTime
+        
+        print("Time: ", timeElapsed)
+        # f.write("Time: " + str(timeElapsed) + "\n")
+
         print("Nodes searched: ", nodesExpanded)
+        # f.write("Nodes searched: " + str(nodesExpanded) + "\n")
+        # f.write("------------------------------------------------------------------ \n")
+
         continueProcessing = input("Would you like to continue? (Y or N): ")
+    
+    # f.close()
 
 if __name__ == '__main__':
     main()

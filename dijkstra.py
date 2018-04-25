@@ -6,6 +6,7 @@ class Dijkstra():
     vistedList = []
     goalNode = None
     counter = 0
+    
     def __init__(self, initNode, endNode):
         self.pq = PriorityQueue()
         self.pq.put(initNode)

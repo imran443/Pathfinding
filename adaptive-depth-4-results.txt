@@ -1,0 +1,18 @@
+Dijkstra: 
+Beginning position: 1,1 Ending position: 98, 98
+Running on file: adaptive-depth-4
+Time: 0:00:03.697423
+Nodes searched: 8139
+------------------------------------------------------------------ 
+A-Star: 
+Beginning position: 1,1 Ending position: 98, 98
+Running on file: adaptive-depth-4
+Time: 0:00:00.036598
+Nodes searched: 794
+------------------------------------------------------------------ 
+JPS: 
+Beginning position: 1,1 Ending position: 98, 98
+Running on file: adaptive-depth-4
+Time: 0:00:00.201080
+Nodes searched: 60
+------------------------------------------------------------------ 

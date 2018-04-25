@@ -57,7 +57,3 @@ class AStar():
             prevNode = prevNode.cameFrom
 
         return gameMap
-
-    
-
-    
